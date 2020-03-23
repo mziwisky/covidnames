@@ -5,13 +5,12 @@ class Card extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { peeking: false };
+    this.state = { peeking: 0 };
   }
 
-  togglePeek() {
-    this.setState({
-      peeking: !this.state.peeking
-    });
+  peek() {
+    this.setState({ peeking: this.state.peeking + 1 });
+    setTimeout(() => this.setState({ peeking: this.state.peeking - 1 }), 3000);
   }
 
   render() {
@@ -30,10 +29,12 @@ class Card extends React.Component {
     if (this.props.revealed)
       className += ' revealed';
 
-    var onClick = (this.props.revealed ? this.togglePeek.bind(this) : this.props.onClick);
-    var content = (this.state.peeking || !this.props.revealed ? this.props.word : null)
+    if (this.state.peeking > 0)
+      className += ' peeking';
 
-    return e('div', { className, onClick }, content);
+    var onClick = (this.props.revealed ? this.peek.bind(this) : this.props.onClick);
+
+    return e('div', { className, onClick }, this.props.word);
   }
 }
 
@@ -176,9 +177,9 @@ class Root extends React.Component {
     if (this.state.appState == "initialized")
       return e('div', null, this.renderStartGameButton(), this.renderJoinGameButton());
     if (this.state.appState == "joining")
-      return e('div', null, `Joining game "${this.state.gameId}"...`);
+      return e('div', null, `Joining game: ${this.state.gameId}...`);
     if (this.state.appState == "watching")
-      return e('div', null, `Watching game "${this.state.gameId}"`,
+      return e('div', null, `Watching game: ${this.state.gameId}`,
         this.renderGuestBoard()
       );
     if (this.state.appState == "hosting")

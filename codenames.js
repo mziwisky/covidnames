@@ -1,18 +1,8 @@
-function sendToClients(clientState) {
-  guests.forEach(function(conn) { conn.send(clientState) });
-}
-
-// click a card, this happens:
-// var index = 12; // for example
-// state = reveal(state, index);
-// sendToClients(getClientState(state));
-
 function newGame() {
-  // TODO: pick random "rotation" of the key
   shuffleArray(WORDS);
   return {
     words: WORDS.slice(0,25),
-    key: KEYS[getRandomInt(KEYS.length)],
+    key: randomKey(),
     revealed: Array(25).fill(false)
   };
 }
@@ -40,16 +30,23 @@ function getClientState(state) {
   };
 }
 
+// 0: civilian, 1: red, 2: blue, 3: assassin
+function randomKey() {
+  var key = [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,(randomInt(2) + 1)];
+  shuffleArray(key);
+  return key;
+}
+
 
 // 0 to max-1
-function getRandomInt(max) {
+function randomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
 // in-place shuffle.  so, ya know, be careful.
 function shuffleArray(array) {
   for (var i = array.length - 1; i > 0; i--) {
-    var j = getRandomInt(i + 1);
+    var j = randomInt(i + 1);
     var temp = array[i];
     array[i] = array[j];
     array[j] = temp;
