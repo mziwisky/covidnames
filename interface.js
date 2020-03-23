@@ -3,23 +3,37 @@ var e = React.createElement;
 class Card extends React.Component {
   // { word, type, revealed }
 
-  render() {
-    var style = { cursor: "pointer" };
-    if (this.props.type == 0) {
-      style['backgroundColor'] = 'antiquewhite';
-    }
-    if (this.props.type == 1) {
-      style['backgroundColor'] = 'palevioletred';
-    }
-    if (this.props.type == 2) {
-      style['backgroundColor'] = 'skyblue';
-    }
-    if (this.props.type == 3) {
-      style['backgroundColor'] = '#333';
-      style['color'] = 'white';
-    }
+  constructor(props) {
+    super(props);
+    this.state = { peeking: false };
+  }
 
-    return e('div', { className: 'Card', style, onClick: this.props.onClick }, this.props.word);
+  togglePeek() {
+    this.setState({
+      peeking: !this.state.peeking
+    });
+  }
+
+  render() {
+    var className = 'Card';
+
+    switch (this.props.type) {
+      case 0: className += ' civilian';
+        break;
+      case 1: className += ' red';
+        break;
+      case 2: className += ' blue';
+        break;
+      case 3: className += ' assassin';
+        break;
+    }
+    if (this.props.revealed)
+      className += ' revealed';
+
+    var onClick = (this.props.revealed ? this.togglePeek.bind(this) : this.props.onClick);
+    var content = (this.state.peeking || !this.props.revealed ? this.props.word : null)
+
+    return e('div', { className, onClick }, content);
   }
 }
 
@@ -67,12 +81,13 @@ class Root extends React.Component {
   renderBoard() {
     var words = this.state.gameState.words;
     var key = this.state.gameState.key;
+    var revealed = this.state.gameState.revealed;
     var rows = [
-      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
+      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
+      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
+      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
+      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
+      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
     ];
 
     return e('div', { className: 'Board' },
@@ -87,12 +102,14 @@ class Root extends React.Component {
   renderGuestBoard() {
     var words = this.state.gameState.words;
     var key = this.state.gameState.key;
+    var revealed = this.state.gameState.revealed;
+
     var rows = [
-      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
-      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], onClick: this.revealCard.bind(this, i) })),
+      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
+      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
+      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
+      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
+      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
     ];
 
     return e('div', { className: 'Board' },
