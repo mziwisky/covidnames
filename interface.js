@@ -79,45 +79,43 @@ class Root extends React.Component {
   }
 
   renderBoard() {
-    var words = this.state.gameState.words;
     var key = this.state.gameState.key;
     var revealed = this.state.gameState.revealed;
-    var rows = [
-      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
-      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
-      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
-      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
-      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) })),
-    ];
+
+    var cards = this.state.gameState.words.map((word, i) => {
+      return e(Card, { key: word, word, type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) });
+    });
+
+    var reds = key.filter(x => x == 1).length
+    var blues = key.filter(x => x == 2).length
+    var goesFirst = reds > blues ?
+      e('div', { className: 'firstPlayer red' }, 'RED goes first') :
+      e('div', { className: 'firstPlayer blue' }, 'BLUE goes first');
 
     return e('div', { className: 'Board' },
-      e(RowOfCards, null, ...rows[0]),
-      e(RowOfCards, null, ...rows[1]),
-      e(RowOfCards, null, ...rows[2]),
-      e(RowOfCards, null, ...rows[3]),
-      e(RowOfCards, null, ...rows[4]),
+      goesFirst,
+      e(RowOfCards, null, ...cards.slice(0,5)),
+      e(RowOfCards, null, ...cards.slice(5,10)),
+      e(RowOfCards, null, ...cards.slice(10,15)),
+      e(RowOfCards, null, ...cards.slice(15,20)),
+      e(RowOfCards, null, ...cards.slice(20,25)),
     );
   }
 
   renderGuestBoard() {
-    var words = this.state.gameState.words;
     var key = this.state.gameState.key;
-    var revealed = this.state.gameState.revealed;
+    var revealed = key.map(v => v != null);
 
-    var rows = [
-      [0,1,2,3,4].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
-      [5,6,7,8,9].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
-      [10,11,12,13,14].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
-      [15,16,17,18,19].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
-      [20,21,22,23,24].map(i => e(Card, { key: i, word: words[i], type: key[i], revealed: key[i] !== null })),
-    ];
+    var cards = this.state.gameState.words.map((word, i) => {
+      return e(Card, { key: word, word, type: key[i], revealed: revealed[i] });
+    });
 
     return e('div', { className: 'Board' },
-      e(RowOfCards, null, ...rows[0]),
-      e(RowOfCards, null, ...rows[1]),
-      e(RowOfCards, null, ...rows[2]),
-      e(RowOfCards, null, ...rows[3]),
-      e(RowOfCards, null, ...rows[4]),
+      e(RowOfCards, null, ...cards.slice(0,5)),
+      e(RowOfCards, null, ...cards.slice(5,10)),
+      e(RowOfCards, null, ...cards.slice(10,15)),
+      e(RowOfCards, null, ...cards.slice(15,20)),
+      e(RowOfCards, null, ...cards.slice(20,25)),
     );
   }
 

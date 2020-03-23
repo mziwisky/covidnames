@@ -1,4 +1,5 @@
 TODO:
  - more keys
- - "who starts" indicator
  - shorter game IDs
+ - maybe a mode where clue givers don't have to be side-by-side
+ - remaining cards count
