@@ -191,9 +191,14 @@ class Root extends React.Component {
       return e('div', null,
         e('div', null, `Hosting! Game ID: ${this.state.myId}`),
         this.renderBoard(),
-        // because i don't have the timing down yet for when people first join
-        // a game, give a button to the host to manually update all guests
-        e('button', { onClick: () => this.updateAllGuests(this.state.gameState) }, 'Update All Guests')
+        e('div', { className: 'HostInstructions' },
+          e('p', null, 'Guests (guessers) can join with the Game ID above.'),
+          e('p', null, 'Clicking a card will reveal its color to all guests.'),
+          e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
+          e('p', null, "Sometimes you'll reveal a card and your guests will report they didn't see it on their end. That's because this is cheap, unreliable software. If that happens to you, you can use this handy button: ",
+            e('button', { onClick: () => this.updateAllGuests(this.state.gameState) }, 'Update All Guests')
+          )
+        ),
       );
   }
 }
