@@ -30,15 +30,20 @@
       justify-content: center;
       height: 60px;
       border: 2px solid;
+      border-color: black;
       margin: 5px;
       cursor: pointer;
       user-select: none;
     }
 
+    .Card.unknown {
+      cursor: default;
+    }
+
     .Card.revealed {
       transition: color 1s;
       color: transparent;
-      border: none;
+      border-color: transparent;
     }
 
     .Card.peeking {

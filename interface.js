@@ -17,6 +17,8 @@ class Card extends React.Component {
     var className = 'Card';
 
     switch (this.props.type) {
+      case null: className += ' unknown';
+        break;
       case 0: className += ' civilian';
         break;
       case 1: className += ' red';
@@ -39,10 +41,8 @@ class Card extends React.Component {
 }
 
 class RowOfCards extends React.Component {
-  // { words }
   render() {
-    return e('div', { className: 'RowOfCards' },
-      this.props.children);
+    return e('div', { className: 'RowOfCards' }, this.props.children);
   }
 }
 
@@ -130,13 +130,15 @@ class Root extends React.Component {
         });
 
         this.state.peer.on('connection', (conn) => {
-          console.log("new watcher!");
-          // for some reason we can't send game state right away
-          setTimeout(() => {
-            conn.send(getClientState(this.state.gameState));
-          }, 1000);
+          console.log("new watcher: " + conn.peer);
           this.setState({
             guests: this.state.guests.concat(conn)
+          });
+
+          // only kind of message clients ever send right now is a "hey i'm
+          // ready for the initial game state", so that's all we respond to
+          conn.on('data', (data) => {
+            conn.send(getClientState(this.state.gameState));
           });
         });
       }
@@ -151,6 +153,9 @@ class Root extends React.Component {
           var hostConn = this.state.peer.connect(gameId);
           hostConn.on('open', () => {
             console.log("opened connection to host: " + gameId);
+            // host can't just send game state immediately upon 'connection',
+            // so we let host know we're ready for it by sending a message
+            hostConn.send({ request: 'gameState' });
           });
           hostConn.on('data', gameState => {
             console.log("got game state!");
