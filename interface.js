@@ -61,7 +61,7 @@ class Root extends React.Component {
     this.setState({
       gameState: newState
     });
-    updateAllGuests(newState);
+    this.updateAllGuests(newState);
   }
 
   renderBoard() {
