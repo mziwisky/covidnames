@@ -145,30 +145,34 @@ class Root extends React.Component {
     }, 'Host New Game');
   }
 
+  joinGame(gameId) {
+    var hostConn = this.state.peer.connect(gameId);
+    hostConn.on('open', () => {
+      console.log("opened connection to host: " + gameId);
+      // host can't just send game state immediately upon 'connection',
+      // so we let host know we're ready for it by sending a message
+      hostConn.send({ request: 'gameState' });
+    });
+    hostConn.on('data', gameState => {
+      console.log("got game state!");
+      this.setState({
+        appState: "watching",
+        gameState
+      });
+    });
+    this.setState({
+      appState: "joining",
+      gameId,
+      hostConn,
+    });
+  }
+
   renderJoinGameButton() {
     return e('form',
       {
         onSubmit: () => {
           var gameId = this.otherGameIdNode.value;
-          var hostConn = this.state.peer.connect(gameId);
-          hostConn.on('open', () => {
-            console.log("opened connection to host: " + gameId);
-            // host can't just send game state immediately upon 'connection',
-            // so we let host know we're ready for it by sending a message
-            hostConn.send({ request: 'gameState' });
-          });
-          hostConn.on('data', gameState => {
-            console.log("got game state!");
-            this.setState({
-              appState: "watching",
-              gameState
-            });
-          });
-          this.setState({
-            appState: "joining",
-            gameId,
-            hostConn,
-          });
+          this.joinGame(gameId);
         }
       },
       e('label', null, 'Join existing game ',
@@ -179,8 +183,14 @@ class Root extends React.Component {
   }
 
   render() {
-    if (this.state.appState == "initialized")
+    if (this.state.appState == "initialized") {
+      if (this.props.initialGameId) {
+        // react doesn't like setting state from within render, but in this
+        // case i'm cool with it, so hack around it with a setTimeout
+        setTimeout(this.joinGame.bind(this, this.props.initialGameId), 0);
+      }
       return e('div', null, this.renderStartGameButton(), this.renderJoinGameButton());
+    }
     if (this.state.appState == "joining")
       return e('div', null, `Joining game: ${this.state.gameId}...`);
     if (this.state.appState == "watching")
@@ -203,7 +213,9 @@ class Root extends React.Component {
   }
 }
 
+var initialGameId = window.location.search.slice(1);
+
 ReactDOM.render(
-  React.createElement(Root, {toWhat: 'World'}, null),
+  React.createElement(Root, { initialGameId }, null),
   document.getElementById('root')
 );
