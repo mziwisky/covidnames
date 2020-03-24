@@ -189,7 +189,10 @@ class Root extends React.Component {
         // case i'm cool with it, so hack around it with a setTimeout
         setTimeout(this.joinGame.bind(this, this.props.initialGameId), 0);
       }
-      return e('div', null, this.renderStartGameButton(), this.renderJoinGameButton());
+      return e('div', null,
+        this.renderStartGameButton(),
+        this.renderJoinGameButton()
+      );
     }
     if (this.state.appState == "joining")
       return e('div', null, `Joining game: ${this.state.gameId}...`);
@@ -197,19 +200,26 @@ class Root extends React.Component {
       return e('div', null, `Watching game: ${this.state.gameId}`,
         this.renderGuestBoard()
       );
-    if (this.state.appState == "hosting")
+    if (this.state.appState == "hosting") {
+      var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
+      var url = window.location.origin + window.location.pathname + '?' + this.state.myId;
       return e('div', null,
-        e('div', null, `Hosting! Game ID: ${this.state.myId}`),
+        e('div', null, heading),
+        e('div', null, 'Guest URL: ',
+          (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
+        ),
         this.renderBoard(),
         e('div', { className: 'HostInstructions' },
-          e('p', null, 'Guests (guessers) can join with the Game ID above.'),
+          e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
           e('p', null, 'Clicking a card will reveal its color to all guests.'),
           e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
-          e('p', null, "Sometimes you'll reveal a card and your guests will report they didn't see it on their end. That's because this is cheap, unreliable software. If that happens to you, you can use this handy button: ",
+          e('p', null, "WARNING: don't refresh the page. If you do, the game will end."),
+          e('p', null, "Sometimes you'll reveal a card and your guests will report they didn't see it on their end. That's because this is cheap, unreliable software. If that happens to you, you can try this handy button (which is also cheap and unreliable, so no promises): ",
             e('button', { onClick: () => this.updateAllGuests(this.state.gameState) }, 'Update All Guests')
           )
         ),
       );
+    }
   }
 }
 
