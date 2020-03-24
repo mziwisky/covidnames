@@ -40,16 +40,6 @@
       cursor: default;
     }
 
-    .Card.revealed {
-      transition: color 1s;
-      color: transparent;
-      border-color: transparent;
-    }
-
-    .Card.peeking {
-      color: white;
-    }
-
     .Card.red {
       background-color: #ffc4d1;
     }
@@ -63,8 +53,13 @@
     }
 
     .Card.assassin {
-      background-color: #333;
-      color: white;
+      background-color: #aaa;
+    }
+
+    .Card.revealed {
+      transition: color 1s;
+      color: transparent;
+      border-color: transparent;
     }
 
     .Card.red.revealed {
@@ -81,6 +76,10 @@
 
     .Card.assassin.revealed {
       background-color: #333;
+    }
+
+    .Card.peeking {
+      color: white;
     }
   </style>
 </head>
