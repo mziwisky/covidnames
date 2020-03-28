@@ -35,29 +35,29 @@ class Victory extends React.Component {
 
   render() {
     if (this.props.winner !== null) {
-      let className = "";
+      let splashClass = "";
       let emoji = "";
       let msg = "";
       switch (this.props.winner) {
         case "red":
-          className = "red-wins";
+          splashClass = "red-wins";
           emoji = "assets/Emoji_u1f389.svg";
           msg = `${capitalizeFirstLetter(this.props.winner)} wins!`;
           break;
         case "blue":
-          className = "blue-wins";
+          splashClass = "blue-wins";
           emoji = "assets/Emoji_u1f389.svg";
           msg = `${capitalizeFirstLetter(this.props.winner)} wins!`;
           break;
         case "assassin":
-          className = "assassin-wins";
+          splashClass = "assassin-wins";
           emoji = "assets/Noto_Emoji_Oreo_2620.svg";
           msg = `You've been assassinated!`;
       }
 
-      return e("div", { className, id: "victory-splash" }, [
-        e("div", { key: 1, id: "banner" }, msg),
-        e("div", { key: 2, id: "emoji", style: { width: this.state.width } }, [
+      return e("div", { className: splashClass, id: "victory-splash" }, [
+        e("div", { key: 1, className: "banner" }, msg),
+        e("div", { key: 2, className: "emoji", style: { width: this.state.width } }, [
           e("img", { key: 2, src: emoji }, null)
         ])
       ]);
