@@ -16,10 +16,6 @@ class Victory extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    // Typical usage (don't forget to compare props):
-    if (this.props.userID !== prevProps.userID) {
-      this.fetchData(this.props.userID);
-    }
     if (this.props.winner !== prevProps.winner && this.props.winner !== null) {
       if (this.props.winner === "assassin") {
         var snd = new Audio("assets/73581__benboncan__sad-trombone.wav");
@@ -57,9 +53,11 @@ class Victory extends React.Component {
 
       return e("div", { className: splashClass, id: "victory-splash" }, [
         e("div", { key: 1, className: "banner" }, msg),
-        e("div", { key: 2, className: "emoji", style: { width: this.state.width } }, [
-          e("img", { key: 2, src: emoji }, null)
-        ])
+        e(
+          "div",
+          { key: 2, className: "emoji", style: { width: this.state.width } },
+          [e("img", { key: 2, src: emoji }, null)]
+        )
       ]);
     } else {
       return null;
