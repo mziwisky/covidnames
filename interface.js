@@ -209,6 +209,7 @@ class Root extends React.Component {
           (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
         ),
         this.renderBoard(),
+        e(Victory, { winner: this.state.gameState.winner }, null),
         e('div', { className: 'HostInstructions' },
           e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
           e('p', null, 'Clicking a card will reveal its color to all guests.'),
