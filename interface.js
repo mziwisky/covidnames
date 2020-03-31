@@ -198,8 +198,8 @@ class Root extends React.Component {
       return e('div', null, `Joining game: ${this.state.gameId}...`);
     if (this.state.appState == "watching")
       return e('div', null, `Watching game: ${this.state.gameId}`,
-        this.renderGuestBoard()
-        e(Victory, { winner: this.state.gameState.winner }, null),
+        this.renderGuestBoard(),
+        e(Victory, { winner: this.state.gameState.winner }, null)
       );
     if (this.state.appState == "hosting") {
       var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
