@@ -198,8 +198,7 @@ class Root extends React.Component {
       return e('div', null, `Joining game: ${this.state.gameId}...`);
     if (this.state.appState == "watching")
       return e('div', null, `Watching game: ${this.state.gameId}`,
-        this.renderGuestBoard(),
-        e(Victory, { winner: this.state.gameState.winner }, null)
+        this.renderGuestBoard()
       );
     if (this.state.appState == "hosting") {
       var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
@@ -210,7 +209,6 @@ class Root extends React.Component {
           (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
         ),
         this.renderBoard(),
-        e(Victory, { winner: this.state.gameState.winner }, null),
         e('div', { className: 'HostInstructions' },
           e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
           e('p', null, 'Clicking a card will reveal its color to all guests.'),

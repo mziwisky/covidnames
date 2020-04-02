@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>COVIDnames</title>
+  <title>Covidnames</title>
 
   <style>
     .Board {
@@ -81,62 +81,19 @@
     .Card.peeking {
       color: white;
     }
-
-    #victory-splash {
-      position: fixed;
-      top: 0px;
-      left: 0px;
-      height: 100%;
-      width: 100%;
-    }
-
-    #victory-splash.assassin-wins {
-      background: rgba(0, 0, 0, 0.7);
-    }
-
-    #victory-splash.blue-wins {
-      background: rgba(0, 0, 255, 0.7);
-    }
-
-    #victory-splash.red-wins {
-      background: rgba(255, 0, 0, 0.7);
-    }
-
-    #victory-splash .banner {
-      margin: auto;
-      padding: 50px;
-      text-align: center;
-      font-size: 100px;
-      font-weight: bold;
-      color: white;
-    }
-
-    #victory-splash .emoji {
-      margin: auto;
-      -webkit-transition: width 1s ease-in-out;
-      -moz-transition: width 1s ease-in-out;
-      -o-transition: width 1s ease-in-out;
-      transition: width 1s ease-in-out;
-    }
   </style>
 </head>
 <body>
 
 <div id="root"></div>
 
-<!-- Check out this codepen for confetti -->
-<!-- http://www.cagrimmett.com/til/2018/01/05/css-confetti.html -->
-<!-- Or probably better yet... just use
-  https://www.npmjs.com/package/canvas-confetti or
-  https://www.npmjs.com/package/react-confetti
--->
 <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 <script src="https://fb.me/react-15.1.0.js"></script>
 <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
 <script src="wordlist.js"></script>
+<script src="keys.js"></script>
 <script src="codenames.js"></script>
-<script src="victory.js"></script>
 <script src="interface.js"></script>
 
 </body>

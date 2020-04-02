@@ -3,8 +3,7 @@ function newGame() {
   return {
     words: WORDS.slice(0,25),
     key: randomKey(),
-    revealed: Array(25).fill(false),
-    winner: null
+    revealed: Array(25).fill(false)
   };
 }
 
@@ -12,22 +11,10 @@ function reveal(state, index) {
   var revealed = state.revealed.slice();
   revealed[index] = true;
 
-  let redWins = state.key.filter((x, i) => x == 1 && !revealed[i]).length === 0;
-  let blueWins = state.key.filter((x, i) => x == 2 && !revealed[i]).length === 0;
-  let assassinWins = state.key.filter((x, i) => x == 3 && revealed[i]).length === 1;
-  let winner = null;
-  if (redWins) {
-    winner = "red";
-  } else if (blueWins) {
-    winner = "blue";
-  } else if (assassinWins) {
-    winner = "assassin";
-  }
   return {
     words: state.words,
     key: state.key,
-    revealed: revealed,
-    winner
+    revealed: revealed
   };
 }
 

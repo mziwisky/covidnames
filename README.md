@@ -1,4 +1,4 @@
-# COVIDnames
+# Covidnames
 
 Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined people.
 
