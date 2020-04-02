@@ -87,11 +87,9 @@ class Root extends React.Component {
       return e(Card, { key: word, word, type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) });
     });
 
-    var reds = key.filter(x => x == 1).length
-    var blues = key.filter(x => x == 2).length
-    var goesFirst = reds > blues ?
-      e('div', { className: 'firstPlayer red' }, 'RED goes first') :
-      e('div', { className: 'firstPlayer blue' }, 'BLUE goes first');
+    var goesFirst = this.state.gameState.firstTeam == 'RED' ?
+      e('div', { className: 'red' }, 'RED goes first') :
+      e('div', { className: 'blue' }, 'BLUE goes first');
 
     return e('div', { className: 'Board' },
       goesFirst,
@@ -118,6 +116,15 @@ class Root extends React.Component {
       e(RowOfCards, null, ...cards.slice(15,20)),
       e(RowOfCards, null, ...cards.slice(20,25)),
     );
+  }
+
+  renderCardsLeft() {
+    return e('div', { className: 'score' },
+      e('span', null, 'Cards remaining:\u00A0'),
+      e('span', { className: 'red' }, `${this.state.gameState.redLeft} red`),
+      e('span', null, '\u00A0--\u00A0'),
+      e('span', { className: 'blue' }, `${this.state.gameState.blueLeft} blue`),
+    )
   }
 
   renderStartGameButton() {
@@ -198,7 +205,8 @@ class Root extends React.Component {
       return e('div', null, `Joining game: ${this.state.gameId}...`);
     if (this.state.appState == "watching")
       return e('div', null, `Watching game: ${this.state.gameId}`,
-        this.renderGuestBoard()
+        this.renderGuestBoard(),
+        this.renderCardsLeft()
       );
     if (this.state.appState == "hosting") {
       var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
@@ -209,6 +217,7 @@ class Root extends React.Component {
           (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
         ),
         this.renderBoard(),
+        this.renderCardsLeft(),
         e('div', { className: 'HostInstructions' },
           e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
           e('p', null, 'Clicking a card will reveal its color to all guests.'),

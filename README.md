@@ -1,4 +1,4 @@
-# Covidnames
+# COVIDnames
 
 Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined people.
 
@@ -10,7 +10,6 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
  - oooo, maybe someday an option to do P2P video chat in the browser?  probably not.
  - shorter game IDs (probably impossible w/o my own server)
  - maybe a mode where clue givers don't have to be side-by-side, i.e. "multi-host"
- - remaining cards count
  - turn indicator?
  - "soft" timer, so dad can flip it on the women?
  - bad game ID detection.  just set a timeout on the guest's connection attempts.  when it expires, render something like "we haven't found this game yet. are you sure you got the ID right?"

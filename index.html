@@ -3,18 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Covidnames</title>
+  <title>COVIDnames</title>
 
   <style>
     .Board {
       padding: 20px;
     }
 
-    .firstPlayer.red {
+    .score {
+      display: flex;
+      justify-content: center;
+    }
+
+    .red {
       color: #ab0000;
     }
 
-    .firstPlayer.blue {
+    .blue {
       color: #0048ab;
     }
 
@@ -87,12 +92,11 @@
 
 <div id="root"></div>
 
-<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"></script>
 <script src="https://fb.me/react-15.1.0.js"></script>
 <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
 <script src="wordlist.js"></script>
-<script src="keys.js"></script>
 <script src="codenames.js"></script>
 <script src="interface.js"></script>
 

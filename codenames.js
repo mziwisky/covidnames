@@ -1,21 +1,32 @@
 function newGame() {
-  shuffleArray(WORDS);
+  shuffleArray(WORDS)
+  var key = randomKey()
+  var redLeft = key.filter(x => x == 1).length
+  var blueLeft = key.filter(x => x == 2).length
   return {
     words: WORDS.slice(0,25),
-    key: randomKey(),
-    revealed: Array(25).fill(false)
-  };
+    key,
+    revealed: Array(25).fill(false),
+    firstTeam: redLeft > blueLeft ? 'RED' : 'BLUE',
+    redLeft,
+    blueLeft
+  }
 }
 
 function reveal(state, index) {
   var revealed = state.revealed.slice();
   revealed[index] = true;
 
+  var { redLeft, blueLeft } = state
+  if (state.key[index] == 1) redLeft--;
+  if (state.key[index] == 2) blueLeft--;
+
   return {
-    words: state.words,
-    key: state.key,
-    revealed: revealed
-  };
+    ...state,
+    revealed,
+    redLeft,
+    blueLeft
+  }
 }
 
 function getClientState(state) {
@@ -25,8 +36,8 @@ function getClientState(state) {
   });
 
   return {
-    words: state.words,
-    key: key
+    ...state,
+    key
   };
 }
 
