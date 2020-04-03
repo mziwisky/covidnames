@@ -9,6 +9,7 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
    - if so, then guest interface needs a link to host a new game, which should totally reset the state of the app.  starting to feel like Root should have props like "gameID" and "isHost" or something.
  - oooo, maybe someday an option to do P2P video chat in the browser?  probably not.
  - shorter game IDs (probably impossible w/o my own server)
+   - can i run a https://github.com/peers/peerjs-server for free on now.sh?
  - maybe a mode where clue givers don't have to be side-by-side, i.e. "multi-host"
  - turn indicator?
  - "soft" timer, so dad can flip it on the women?
@@ -19,4 +20,5 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
    - upon reload, connect to all guests and let them know you're the new host now.  do a history.replaceState on the guests so that if they refresh, they stay connected to the right host.
    - uh... how to distinguish between a refresh on a game you're hosting and a navigation to a game you're NOT hosting?  i think we just store the host ID along with the game state.
    - when a host refreshes, the URL changes because the game ID.  that's kind of weird, but i can't think of any other way to do this w/o a server.
+ - when a game finishes, let a watcher host a new game and all existing participants become watchers.
 
