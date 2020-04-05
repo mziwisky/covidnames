@@ -21,4 +21,5 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
    - uh... how to distinguish between a refresh on a game you're hosting and a navigation to a game you're NOT hosting?  i think we just store the host ID along with the game state.
    - when a host refreshes, the URL changes because the game ID.  that's kind of weird, but i can't think of any other way to do this w/o a server.
  - when a game finishes, let a watcher host a new game and all existing participants become watchers.
+ - handle "Error: Lost connection to server". Happens if the server goes down. Current game will continue just fine, because peers retain P2P connection, but they are no longer discoverable after the server comes back online. So make them reregister with the server once it's back.
 

@@ -8,7 +8,7 @@ class Card extends React.Component {
     this.state = { peeking: 0 };
   }
 
-  peek() {
+  peek = () => {
     this.setState({ peeking: this.state.peeking + 1 });
     setTimeout(() => this.setState({ peeking: this.state.peeking - 1 }), 3000);
   }
@@ -34,7 +34,7 @@ class Card extends React.Component {
     if (this.state.peeking > 0)
       className += ' peeking';
 
-    var onClick = (this.props.revealed ? this.peek.bind(this) : this.props.onClick);
+    var onClick = (this.props.revealed ? this.peek : this.props.onClick);
 
     return e('div', { className, onClick }, this.props.word);
   }
@@ -50,16 +50,68 @@ class Root extends React.Component {
   constructor(props) {
     super(props);
     var peer = new Peer();
-    this.state = {
-      appState: "initialized",
-      peer: peer
-    };
+    this.state = { peer: peer }
+    if (props.initialGameId) {
+      this.state.gameId = props.initialGameId
+      this.state.appState = "needToJoin"
+    } else {
+      this.state.appState = "initializing"
+    }
 
-    peer.on('open', (id) => {
-      console.log('My peer ID is: ' + id);
+    peer.on('open', this.setMyPeerId)
+  }
+
+  setMyPeerId = (id) => {
+    if (this.state.myId) console.log("WARNING: my peer ID is already set, this is probably bad")
+    console.log('My peer ID is: ' + id);
+    var newState = { myId: id }
+    if (this.state.appState == "initializing") {
+      newState.appState = "initialized"
+    }
+    this.setState(newState)
+    if (this.state.appState == "needToJoin") {
+      this.actuallyJoin()
+    }
+  }
+
+  joinGame = (gameId) => {
+    if (this.state.appState == "initialized") {
+      this.actuallyJoin(gameId)
+    } else if (this.state.appState == "initializing") {
       this.setState({
-        myId: id
+        gameId,
+        appState: "needToJoin"
       });
+    } else {
+      console.log(`WARNING: tried to join game from appState=${this.state.appState} -- doing nothing`)
+    }
+  }
+
+  actuallyJoin = (gameId) => {
+    gameId = gameId || this.state.gameId
+    var hostConn = this.state.peer.connect(gameId);
+    hostConn.on('open', () => {
+      console.log("opened connection to host: " + gameId);
+      // host can't just send game state immediately upon 'connection',
+      // so we let host know we're ready for it by sending a message
+      hostConn.send({ request: 'gameState' });
+    });
+
+    // NOTE: assumes the only data host sends is game state
+    hostConn.on('data', this.updateStateFromHost)
+
+    this.setState({
+      appState: "joining",
+      gameId,
+      hostConn,
+    });
+  }
+
+  updateStateFromHost = (gameState) => {
+    console.log("got game state!");
+    this.setState({
+      appState: "watching",
+      gameState
     });
   }
 
@@ -128,49 +180,29 @@ class Root extends React.Component {
   }
 
   renderStartGameButton() {
-    return e('button', {
-      onClick: () => {
-        this.setState({
-          appState: "hosting",
-          gameState: newGame(),
-          guests: [],
-        });
-
-        this.state.peer.on('connection', (conn) => {
-          console.log("new watcher: " + conn.peer);
-          this.setState({
-            guests: this.state.guests.concat(conn)
-          });
-
-          // only kind of message clients ever send right now is a "hey i'm
-          // ready for the initial game state", so that's all we respond to
-          conn.on('data', (data) => {
-            conn.send(getClientState(this.state.gameState));
-          });
-        });
-      }
-    }, 'Host New Game');
+    return e('button', { onClick: this.configureForHosting }, 'Host New Game');
   }
 
-  joinGame(gameId) {
-    var hostConn = this.state.peer.connect(gameId);
-    hostConn.on('open', () => {
-      console.log("opened connection to host: " + gameId);
-      // host can't just send game state immediately upon 'connection',
-      // so we let host know we're ready for it by sending a message
-      hostConn.send({ request: 'gameState' });
-    });
-    hostConn.on('data', gameState => {
-      console.log("got game state!");
-      this.setState({
-        appState: "watching",
-        gameState
-      });
-    });
+  configureForHosting = () => {
     this.setState({
-      appState: "joining",
-      gameId,
-      hostConn,
+      appState: 'hosting',
+      gameState: newGame(),
+      guests: [],
+    });
+
+    this.state.peer.on('connection', this.registerWatcher)
+  }
+
+  registerWatcher = (conn) => {
+    console.log("new watcher: " + conn.peer);
+    this.setState({
+      guests: this.state.guests.concat(conn)
+    });
+
+    // only kind of message clients ever send right now is a "hey i'm
+    // ready for the initial game state", so that's all we respond to
+    conn.on('data', (data) => {
+      conn.send(getClientState(this.state.gameState));
     });
   }
 
@@ -190,44 +222,38 @@ class Root extends React.Component {
   }
 
   render() {
-    if (this.state.appState == "initialized") {
-      if (this.props.initialGameId) {
-        // react doesn't like setting state from within render, but in this
-        // case i'm cool with it, so hack around it with a setTimeout
-        setTimeout(this.joinGame.bind(this, this.props.initialGameId), 0);
-      }
-      return e('div', null,
-        this.renderStartGameButton(),
-        this.renderJoinGameButton()
-      );
-    }
-    if (this.state.appState == "joining")
-      return e('div', null, `Joining game: ${this.state.gameId}...`);
-    if (this.state.appState == "watching")
-      return e('div', null, `Watching game: ${this.state.gameId}`,
-        this.renderGuestBoard(),
-        this.renderCardsLeft()
-      );
-    if (this.state.appState == "hosting") {
-      var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
-      var url = window.location.origin + window.location.pathname + '?' + this.state.myId;
-      return e('div', null,
-        e('div', null, heading),
-        e('div', null, 'Guest URL: ',
-          (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
-        ),
-        this.renderBoard(),
-        this.renderCardsLeft(),
-        e('div', { className: 'HostInstructions' },
-          e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
-          e('p', null, 'Clicking a card will reveal its color to all guests.'),
-          e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
-          e('p', null, "WARNING: don't refresh the page. If you do, the game will end."),
-          e('p', null, "Sometimes you'll reveal a card and your guests will report they didn't see it on their end. That's because this is cheap, unreliable software. If that happens to you, you can try this handy button (which is also cheap and unreliable, so no promises): ",
-            e('button', { onClick: () => this.updateAllGuests(this.state.gameState) }, 'Update All Guests')
-          )
-        ),
-      );
+    switch (this.state.appState) {
+      case "initializing":
+      case "initialized":
+        return e('div', null,
+          this.renderStartGameButton(),
+          this.renderJoinGameButton()
+        );
+      case "needToJoin":
+      case "joining":
+        return e('div', null, `Joining game: ${this.state.gameId}...`);
+      case "watching":
+        return e('div', null, `Watching game: ${this.state.gameId}`,
+          this.renderGuestBoard(),
+          this.renderCardsLeft()
+        );
+      case "hosting":
+        var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
+        var url = window.location.origin + window.location.pathname + '?' + this.state.myId;
+        return e('div', null,
+          e('div', null, heading),
+          e('div', null, 'Guest URL: ',
+            (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
+          ),
+          this.renderBoard(),
+          this.renderCardsLeft(),
+          e('div', { className: 'HostInstructions' },
+            e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
+            e('p', null, 'Clicking a card will reveal its color to all guests.'),
+            e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
+            e('p', null, "WARNING: don't refresh the page. If you do, the game will end."),
+          ),
+        );
     }
   }
 }
