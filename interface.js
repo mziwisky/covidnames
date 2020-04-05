@@ -49,7 +49,9 @@ class RowOfCards extends React.Component {
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    var peer = new Peer();
+    // TODO: some kind of switch to let users go onto this herokuapp in case the main PeerJS server goes down
+    // var peer = new Peer(randomPeerId(), {debug: 3, secure: false, port: 80, host: 'covidnames-peer-server.herokuapp.com'});
+    var peer = new Peer(randomPeerId(), {debug: 3});
     this.state = { peer: peer }
     if (props.initialGameId) {
       this.state.gameId = props.initialGameId
@@ -62,8 +64,8 @@ class Root extends React.Component {
   }
 
   setMyPeerId = (id) => {
-    if (this.state.myId) console.log("WARNING: my peer ID is already set, this is probably bad")
-    console.log('My peer ID is: ' + id);
+    if (this.state.myId) console.log("WARNING: my peer ID is already set, this is probably bad");
+    console.log('My peer ID is: ' + id)
     var newState = { myId: id }
     if (this.state.appState == "initializing") {
       newState.appState = "initialized"
@@ -89,7 +91,7 @@ class Root extends React.Component {
 
   actuallyJoin = (gameId) => {
     gameId = gameId || this.state.gameId
-    var hostConn = this.state.peer.connect(gameId);
+    var hostConn = this.state.peer.connect(fullPeerId(gameId));
     hostConn.on('open', () => {
       console.log("opened connection to host: " + gameId);
       // host can't just send game state immediately upon 'connection',
@@ -238,8 +240,8 @@ class Root extends React.Component {
           this.renderCardsLeft()
         );
       case "hosting":
-        var heading = this.state.myId ? `Hosting! Game ID: ${this.state.myId}` : "Hosting! Loading Game ID...";
-        var url = window.location.origin + window.location.pathname + '?' + this.state.myId;
+        var heading = this.state.myId ? `Hosting! Game ID: ${displayId(this.state.myId)}` : "Hosting! Loading Game ID...";
+        var url = window.location.origin + window.location.pathname + '?' + displayId(this.state.myId);
         return e('div', null,
           e('div', null, heading),
           e('div', null, 'Guest URL: ',

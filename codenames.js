@@ -63,3 +63,25 @@ function shuffleArray(array) {
     array[j] = temp;
   }
 }
+
+const ID_POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const PEER_PREFIX = 'COVIDnames-'
+
+function randomChar() {
+  return ID_POOL.charAt(randomInt(ID_POOL.length))
+}
+
+function randomPeerId() {
+  var id = randomChar() + randomChar() + randomChar() + randomChar() + randomChar()
+  return fullPeerId(id)
+}
+
+function displayId(actualPeerId) {
+  if (!actualPeerId) return actualPeerId;
+  return actualPeerId.replace(PEER_PREFIX, '')
+}
+
+function fullPeerId(displayId) {
+  if (!displayId) return displayId;
+  return `${PEER_PREFIX}${displayId}`
+}

@@ -8,8 +8,6 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
  - or, maybe just go straight to hosting a new game on the landing page, now that there's a guest URL there and sharing that is easier than having guests enter the ID in an input.
    - if so, then guest interface needs a link to host a new game, which should totally reset the state of the app.  starting to feel like Root should have props like "gameID" and "isHost" or something.
  - oooo, maybe someday an option to do P2P video chat in the browser?  probably not.
- - shorter game IDs (probably impossible w/o my own server)
-   - can i run a https://github.com/peers/peerjs-server for free on now.sh?
  - maybe a mode where clue givers don't have to be side-by-side, i.e. "multi-host"
  - turn indicator?
  - "soft" timer, so dad can flip it on the women?
