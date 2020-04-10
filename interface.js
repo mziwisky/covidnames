@@ -1,51 +1,5 @@
 var e = React.createElement;
 
-class Card extends React.Component {
-  // { word, type, revealed }
-
-  constructor(props) {
-    super(props);
-    this.state = { peeking: 0 };
-  }
-
-  peek = () => {
-    this.setState({ peeking: this.state.peeking + 1 });
-    setTimeout(() => this.setState({ peeking: this.state.peeking - 1 }), 3000);
-  }
-
-  render() {
-    var className = 'Card';
-
-    switch (this.props.type) {
-      case null: className += ' unknown';
-        break;
-      case 0: className += ' civilian';
-        break;
-      case 1: className += ' red';
-        break;
-      case 2: className += ' blue';
-        break;
-      case 3: className += ' assassin';
-        break;
-    }
-    if (this.props.revealed)
-      className += ' revealed';
-
-    if (this.state.peeking > 0)
-      className += ' peeking';
-
-    var onClick = (this.props.revealed ? this.peek : this.props.onClick);
-
-    return e('div', { className, onClick }, this.props.word);
-  }
-}
-
-class RowOfCards extends React.Component {
-  render() {
-    return e('div', { className: 'RowOfCards' }, this.props.children);
-  }
-}
-
 class Root extends React.Component {
   constructor(props) {
     super(props);
@@ -94,13 +48,10 @@ class Root extends React.Component {
     var hostConn = this.state.peer.connect(fullPeerId(gameId));
     hostConn.on('open', () => {
       console.log("opened connection to host: " + gameId);
-      // host can't just send game state immediately upon 'connection',
-      // so we let host know we're ready for it by sending a message
-      hostConn.send({ request: 'gameState' });
+      hostConn.send({ msg: 'gimme_game_state' });
     });
 
-    // NOTE: assumes the only data host sends is game state
-    hostConn.on('data', this.updateStateFromHost)
+    hostConn.on('data', this.handleHostData)
 
     this.setState({
       appState: "joining",
@@ -109,28 +60,75 @@ class Root extends React.Component {
     });
   }
 
+  handleHostData = (data) => {
+    console.log('Host data:', data)
+    switch (data.msg) {
+      case 'guest_game_state':
+        this.updateStateFromHost(data.gameState)
+        break
+      case 'co_host_game_state':
+        this.setState({ gameState: data.gameState })
+        break
+      case 'accept_co_host':
+        this.setState({
+          appState: 'coHosting',
+          gameState: data.gameState
+        })
+        break;
+    }
+  }
+
   updateStateFromHost = (gameState) => {
-    console.log("got game state!");
     this.setState({
-      appState: "watching",
+      appState: 'watching',
       gameState
     });
+  }
+
+  askToCoHost = () => {
+    this.state.hostConn.send({ msg: 'request_co_host' })
   }
 
   updateAllGuests(gameState) {
     var clientState = getClientState(gameState);
     this.state.guests.forEach((conn) => {
-      conn.send(clientState)
+      switch (conn.peer) {
+        case this.state.coHost.peer:
+          conn.send({
+            msg: 'co_host_game_state',
+            gameState
+          })
+          break
+        default:
+          conn.send({
+            msg: 'guest_game_state',
+            gameState: clientState
+          })
+          break
+      }
     })
   }
 
   revealCard(index) {
+    switch (this.state.appState) {
+      case 'hosting': this.actuallyRevealCard(index)
+        break
+      case 'coHosting': this.askToRevealCard(index)
+        break
+    }
+  }
+
+  actuallyRevealCard(index) {
     console.log("revealing " + index);
     var newState = reveal(this.state.gameState, index);
     this.setState({
       gameState: newState
     });
     this.updateAllGuests(newState);
+  }
+
+  askToRevealCard(index) {
+    this.state.hostConn.send({ msg: 'reveal_card', index })
   }
 
   renderBoard() {
@@ -201,11 +199,37 @@ class Root extends React.Component {
       guests: this.state.guests.concat(conn)
     });
 
-    // only kind of message clients ever send right now is a "hey i'm
-    // ready for the initial game state", so that's all we respond to
-    conn.on('data', (data) => {
-      conn.send(getClientState(this.state.gameState));
-    });
+    conn.on('data', (data) => this.handleWatcherData(conn, data))
+  }
+
+  handleWatcherData = (conn, data) => {
+    console.log('Watcher data:', data)
+    switch (data.msg) {
+      case 'gimme_game_state':
+        conn.send({
+          msg: 'guest_game_state',
+          gameState: getClientState(this.state.gameState)
+        })
+        break
+      case 'request_co_host':
+        if (this.state.coHost) {
+          console.log('co-host request rejected because already have a co-host')
+          conn.send({msg: 'reject_co_host'})
+        } else if (this.state.coHostRequester) {
+          console.log('co-host request rejected because already have a co-host requester')
+          conn.send({msg: 'reject_co_host'})
+        } else {
+          this.setState({ coHostRequester: conn })
+        }
+        break
+      case 'reveal_card':
+        if (this.state.coHost.peer == conn.peer) {
+          this.revealCard(data.index)
+        } else {
+          console.log('non-co-host tried to reveal a card')
+        }
+        break
+    }
   }
 
   renderJoinGameButton() {
@@ -223,6 +247,32 @@ class Root extends React.Component {
     );
   }
 
+  acceptCoHost = () => {
+    this.state.coHostRequester.send({
+      msg: 'accept_co_host',
+      gameState: this.state.gameState
+    })
+    this.setState({
+      coHost: this.state.coHostRequester,
+      coHostRequester: null
+    });
+  }
+
+  rejectCoHost = () => {
+    this.state.coHostRequester.send({ msg: 'reject_co_host' })
+    this.setState({ coHostRequester: null });
+  }
+
+  renderNotifications = () => {
+    var children = this.state.coHostRequester ?  [
+      e('span', null, 'Co-host requested, i.e. someone wants to see the colors.'),
+      e('button', { onClick: this.acceptCoHost }, 'Accept'),
+      e('button', { onClick: this.rejectCoHost }, 'Reject')
+    ] : []
+
+    return e('div', { className: 'Notifications' }, ...children)
+  }
+
   render() {
     switch (this.state.appState) {
       case "initializing":
@@ -236,6 +286,7 @@ class Root extends React.Component {
         return e('div', null, `Joining game: ${this.state.gameId}...`);
       case "watching":
         return e('div', null, `Watching game: ${this.state.gameId}`,
+          e('button', { onClick: this.askToCoHost }, 'Ask To Co-Host'),
           this.renderGuestBoard(),
           this.renderCardsLeft()
         );
@@ -243,6 +294,7 @@ class Root extends React.Component {
         var heading = this.state.myId ? `Hosting! Game ID: ${displayId(this.state.myId)}` : "Hosting! Loading Game ID...";
         var url = window.location.origin + window.location.pathname + '?' + displayId(this.state.myId);
         return e('div', null,
+          this.renderNotifications(),
           e('div', null, heading),
           e('div', null, 'Guest URL: ',
             (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
@@ -256,6 +308,24 @@ class Root extends React.Component {
             e('p', null, "WARNING: don't refresh the page. If you do, the game will end."),
           ),
         );
+      case "coHosting":
+        var heading = `Co-Hosting! Game ID: ${displayId(this.state.gameId)}`
+        var url = window.location.origin + window.location.pathname + '?' + displayId(this.state.gameId);
+        return e('div', null,
+          this.renderNotifications(),
+          e('div', null, heading),
+          e('div', null, 'Guest URL: ',
+            (this.state.myId ? e('a', { href: url, target: '_blank' }, url) : 'Loading...')
+          ),
+          this.renderBoard(),
+          this.renderCardsLeft(),
+          e('div', { className: 'HostInstructions' },
+            e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
+            e('p', null, 'Clicking a card will reveal its color to all guests.'),
+            e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
+            e('p', null, "WARNING: don't refresh the page. If you do, you'll lose your co-host status and won't be able to regain it. (This is a bug, it'll maybe be fixed sometime.)"),
+          ),
+        )
     }
   }
 }
