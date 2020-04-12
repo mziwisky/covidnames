@@ -91,9 +91,10 @@ class Root extends React.Component {
 
   updateAllGuests(gameState) {
     var clientState = getClientState(gameState);
+    var coHost = this.state.coHost || {}
     this.state.guests.forEach((conn) => {
       switch (conn.peer) {
-        case this.state.coHost.peer:
+        case coHost.peer:
           conn.send({
             msg: 'co_host_game_state',
             gameState
