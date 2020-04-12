@@ -306,6 +306,9 @@ class Root extends React.Component {
             e('p', null, 'Clicking a card will reveal its color to all guests.'),
             e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
             e('p', null, "WARNING: don't refresh the page. If you do, the game will end."),
+            e('p', null, "Sometimes you'll reveal a card and your guests will report they didn't see it on their end. That's because this is cheap, unreliable software. If that happens to you, you can try this handy button (which is also cheap and unreliable, so no promises): ",
+              e('button', { onClick: () => this.updateAllGuests(this.state.gameState) }, 'Update All Guests')
+            )
           ),
         );
       case "coHosting":
@@ -323,8 +326,8 @@ class Root extends React.Component {
             e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
             e('p', null, 'Clicking a card will reveal its color to all guests.'),
             e('p', null, 'Clicking an already-revealed card will peek at the word underneath.'),
-            e('p', null, "WARNING: don't refresh the page. If you do, you'll lose your co-host status and won't be able to regain it. (This is a bug, it'll maybe be fixed sometime.)"),
-          ),
+            e('p', null, "WARNING: don't refresh the page. If you do, you'll lose your co-host status and won't be able to regain it. (This is a bug, it'll maybe be fixed sometime.)")
+          )
         )
     }
   }
