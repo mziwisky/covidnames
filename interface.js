@@ -6,7 +6,10 @@ class Root extends React.Component {
     // TODO: some kind of switch to let users go onto this herokuapp in case the main PeerJS server goes down
     // var peer = new Peer(randomPeerId(), {debug: 3, secure: false, port: 80, host: 'covidnames-peer-server.herokuapp.com'});
     var peer = new Peer(randomPeerId(), {debug: 3});
-    this.state = { peer: peer }
+    this.state = {
+      peer,
+      timerTime: 60
+    }
     if (props.initialGameId) {
       this.state.gameId = props.initialGameId
       this.state.appState = "needToJoin"
@@ -63,6 +66,9 @@ class Root extends React.Component {
   handleHostData = (data) => {
     console.log('Host data:', data)
     switch (data.msg) {
+      case 'start_guest_timer':
+        this.startTimer()
+        break
       case 'guest_game_state':
         this.updateStateFromHost(data.gameState)
         break
@@ -132,6 +138,43 @@ class Root extends React.Component {
     this.state.hostConn.send({ msg: 'reveal_card', index })
   }
 
+  askToStartTimer = () => {
+    this.state.hostConn.send({ msg: 'start_timer' })
+  }
+
+  startTimer = () => {
+    if (this.state.timerActivated) return;
+    const timerInterval = setInterval(() => {
+      let timerTime = this.state.timerTime - 1
+      if (timerTime < 0) {
+        timerTime = 60
+        clearInterval(timerInterval)
+        this.setState({
+          timerActivated: false,
+          timerTime
+        })
+      } else {
+        this.setState({ timerTime })
+      }
+    }, 1000)
+    this.setState({ timerActivated: true })
+  }
+
+  startAllTimers = () => {
+    this.startTimer()
+    this.state.guests.forEach((conn) => {
+      conn.send({ msg: 'start_guest_timer' })
+    })
+  }
+
+  renderTimer() {
+    const onClick = this.state.appState == 'hosting' ? this.startAllTimers : this.askToStartTimer
+    return e('div', null,
+      e('button', { onClick, disabled: this.state.timerActivated }, "Start timer"),
+      e('span', null, `0:${(this.state.timerTime/100).toFixed(2).substr(2)}`)
+    )
+  }
+
   renderBoard() {
     var key = this.state.gameState.key;
     var revealed = this.state.gameState.revealed;
@@ -150,7 +193,7 @@ class Root extends React.Component {
       e(RowOfCards, null, ...cards.slice(5,10)),
       e(RowOfCards, null, ...cards.slice(10,15)),
       e(RowOfCards, null, ...cards.slice(15,20)),
-      e(RowOfCards, null, ...cards.slice(20,25)),
+      e(RowOfCards, null, ...cards.slice(20,25))
     );
   }
 
@@ -206,6 +249,9 @@ class Root extends React.Component {
   handleWatcherData = (conn, data) => {
     console.log('Watcher data:', data)
     switch (data.msg) {
+      case 'start_timer':
+        this.startAllTimers()
+        break
       case 'gimme_game_state':
         conn.send({
           msg: 'guest_game_state',
@@ -289,7 +335,8 @@ class Root extends React.Component {
         return e('div', null, `Watching game: ${this.state.gameId}`,
           e('button', { onClick: this.askToCoHost }, 'Ask To Co-Host'),
           this.renderGuestBoard(),
-          this.renderCardsLeft()
+          this.renderCardsLeft(),
+          this.renderTimer()
         );
       case "hosting":
         var heading = this.state.myId ? `Hosting! Game ID: ${displayId(this.state.myId)}` : "Hosting! Loading Game ID...";
@@ -302,6 +349,7 @@ class Root extends React.Component {
           ),
           this.renderBoard(),
           this.renderCardsLeft(),
+          this.renderTimer(),
           e('div', { className: 'HostInstructions' },
             e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
             e('p', null, 'Clicking a card will reveal its color to all guests.'),
@@ -323,6 +371,7 @@ class Root extends React.Component {
           ),
           this.renderBoard(),
           this.renderCardsLeft(),
+          this.renderTimer(),
           e('div', { className: 'HostInstructions' },
             e('p', null, 'Guests (guessers) can join with the Game ID or Guest URL above.'),
             e('p', null, 'Clicking a card will reveal its color to all guests.'),
