@@ -9,7 +9,6 @@ Like [Codenames](https://czechgames.com/en/codenames/), but for quarantined peop
    - if so, then guest interface needs a link to host a new game, which should totally reset the state of the app.  starting to feel like Root should have props like "gameID" and "isHost" or something.
  - oooo, maybe someday an option to do P2P video chat in the browser?  probably not.
  - turn indicator?
- - "soft" timer, so dad can flip it on the women?
  - bad game ID detection.  just set a timeout on the guest's connection attempts.  when it expires, render something like "we haven't found this game yet. are you sure you got the ID right?"
  - add history capabilities.  i.e. let hosts and guests go "Back" to the landing page, and make host's URL change to the direct-navigation URL that can be shared with guests.
  - use localStorage to make it so hosts that accidentally browse away or refresh can pick up where they left off.

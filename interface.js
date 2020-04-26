@@ -1,5 +1,7 @@
 var e = React.createElement;
 
+const TIMER_DURATION = 60
+
 class Root extends React.Component {
   constructor(props) {
     super(props);
@@ -8,7 +10,7 @@ class Root extends React.Component {
     var peer = new Peer(randomPeerId(), {debug: 3});
     this.state = {
       peer,
-      timerTime: 60
+      timerTime: TIMER_DURATION
     }
     if (props.initialGameId) {
       this.state.gameId = props.initialGameId
@@ -145,9 +147,9 @@ class Root extends React.Component {
   startTimer = () => {
     if (this.state.timerActivated) return;
     const timerInterval = setInterval(() => {
-      let timerTime = this.state.timerTime - 1
+      let timerTime = this.state.timerTime - 0.1
       if (timerTime < 0) {
-        timerTime = 60
+        timerTime = TIMER_DURATION
         clearInterval(timerInterval)
         this.setState({
           timerActivated: false,
@@ -156,7 +158,7 @@ class Root extends React.Component {
       } else {
         this.setState({ timerTime })
       }
-    }, 1000)
+    }, 100)
     this.setState({ timerActivated: true })
   }
 
@@ -167,11 +169,25 @@ class Root extends React.Component {
     })
   }
 
+  renderTimerProgress() {
+    let className = 'timerProgressInner'
+    const comp = (this.state.timerTime + Number.EPSILON) * 10 % 20
+    if (comp < 5) className += ' transparent';
+    if (this.state.timerTime <= 10) className += ' almostUp';
+    let pct = (100 * this.state.timerTime / TIMER_DURATION).toFixed(3)
+    if (!this.state.timerActivated) pct = 0;
+    const style = { width: `${pct}%` }
+
+    return e('div', { className: 'timerProgressOuter' },
+      e('div', { className, style }))
+  }
+
   renderTimer() {
     const onClick = this.state.appState == 'hosting' ? this.startAllTimers : this.askToStartTimer
     return e('div', null,
       e('button', { onClick, disabled: this.state.timerActivated }, "Start timer"),
-      e('span', null, `0:${(this.state.timerTime/100).toFixed(2).substr(2)}`)
+      e('span', null, `0:${(this.state.timerTime/100).toFixed(2).substr(2)}`),
+      this.renderTimerProgress()
     )
   }
 
