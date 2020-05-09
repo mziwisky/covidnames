@@ -6,8 +6,8 @@ class Root extends React.Component {
   constructor(props) {
     super(props);
     // TODO: some kind of switch to let users go onto this herokuapp in case the main PeerJS server goes down
-    // var peer = new Peer(randomPeerId(), {debug: 3, secure: false, port: 80, host: 'covidnames-peer-server.herokuapp.com'});
-    var peer = new Peer(randomPeerId(), {debug: 3});
+    var peer = new Peer(randomPeerId(), {debug: 3, secure: false, port: 80, host: 'covidnames-peer-server.herokuapp.com'});
+    // var peer = new Peer(randomPeerId(), {debug: 3});
     this.state = {
       peer,
       timerTime: TIMER_DURATION
