@@ -1,8 +1,14 @@
+const eggIndices = [2,7,12,17,22];
+
 function applyEgg(state) {
   if (state.words.includes("JACK")) {
     state.words = WORDS.slice(25,50);
   }
-  state.words = ['JACK', 'WILL', 'SOON', 'HAVE', 'COMPETITION'].concat(state.words).slice(0,25);
+  state.words[eggIndices[0]] = 'JACK'
+  state.words[eggIndices[1]] = 'WILL'
+  state.words[eggIndices[2]] = 'SOON'
+  state.words[eggIndices[3]] = 'ENCOUNTER'
+  state.words[eggIndices[4]] = 'COMPETITION'
   return state
 }
 
