@@ -1,16 +1,24 @@
+function applyEgg(state) {
+  if (state.words.includes("JACK")) {
+    state.words = WORDS.slice(25,50);
+  }
+  state.words = ['JACK', 'WILL', 'SOON', 'HAVE', 'COMPETITION'].concat(state.words).slice(0,25);
+  return state
+}
+
 function newGame() {
   shuffleArray(WORDS)
   var key = randomKey()
   var redLeft = key.filter(x => x == 1).length
   var blueLeft = key.filter(x => x == 2).length
-  return {
+  return applyEgg({
     words: WORDS.slice(0,25),
     key,
     revealed: Array(25).fill(false),
     firstTeam: redLeft > blueLeft ? 'RED' : 'BLUE',
     redLeft,
     blueLeft
-  }
+  })
 }
 
 function reveal(state, index) {
