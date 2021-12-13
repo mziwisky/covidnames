@@ -68,9 +68,6 @@ class Root extends React.Component {
   handleHostData = (data) => {
     console.log('Host data:', data)
     switch (data.msg) {
-      case 'start_blinken':
-        this.setState({ blinken: true });
-        break
       case 'start_guest_timer':
         this.startTimer()
         break
@@ -172,17 +169,6 @@ class Root extends React.Component {
     })
   }
 
-  startAllBlinken = () => {
-    this.setState({ blinken: true })
-    this.state.guests.forEach((conn) => {
-      conn.send({ msg: 'start_blinken' })
-    })
-  }
-
-  askToBlinken = () => {
-    this.state.hostConn.send({ msg: 'start_blinken' });
-  }
-
   renderTimerProgress() {
     let className = 'timerProgressInner'
     const comp = (this.state.timerTime + Number.EPSILON) * 10 % 20
@@ -210,14 +196,7 @@ class Root extends React.Component {
     var revealed = this.state.gameState.revealed;
 
     var cards = this.state.gameState.words.map((word, i) => {
-      return e(Card, {
-        key: word,
-        word,
-        type: key[i],
-        revealed: revealed[i],
-        blinken: i<5 && this.state.blinken,
-        onClick: this.revealCard.bind(this, i)
-      });
+      return e(Card, { key: word, word, type: key[i], revealed: revealed[i], onClick: this.revealCard.bind(this, i) });
     });
 
     var goesFirst = this.state.gameState.firstTeam == 'RED' ?
@@ -239,13 +218,7 @@ class Root extends React.Component {
     var revealed = key.map(v => v != null);
 
     var cards = this.state.gameState.words.map((word, i) => {
-      return e(Card, {
-        key: word,
-        word,
-        type: key[i],
-        blinken: i<5 && this.state.blinken,
-        revealed: revealed[i]
-      });
+      return e(Card, { key: word, word, type: key[i], revealed: revealed[i] });
     });
 
     return e('div', { className: 'Board' },
@@ -292,9 +265,6 @@ class Root extends React.Component {
   handleWatcherData = (conn, data) => {
     console.log('Watcher data:', data)
     switch (data.msg) {
-      case 'start_blinken':
-        this.startAllBlinken()
-        break
       case 'start_timer':
         this.startAllTimers()
         break
@@ -366,12 +336,6 @@ class Root extends React.Component {
     return e('div', { className: 'Notifications' }, ...children)
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.spoiler && !prevState.spoiler) {
-      this.state.appState == 'hosting' ? this.startAllBlinken() : this.askToBlinken()
-    }
-  }
-
   render() {
     switch (this.state.appState) {
       case "initializing":
@@ -437,11 +401,7 @@ class Root extends React.Component {
 
 var initialGameId = window.location.search.slice(1);
 
-window.app = ReactDOM.render(
+ReactDOM.render(
   React.createElement(Root, { initialGameId }, null),
   document.getElementById('root')
 );
-
-function jack() {
-  app.setState({ spoiler: true });
-}

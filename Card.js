@@ -5,30 +5,12 @@ class Card extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { peeking: 0, blinking: 0 };
+    this.state = { peeking: 0 };
   }
 
   peek = () => {
     this.setState({ peeking: this.state.peeking + 1 });
     setTimeout(() => this.setState({ peeking: this.state.peeking - 1 }), 3000);
-  }
-
-  blink = () => {
-    if (this.state.blinking) return;
-    const blinker = setInterval(() => this.setState({ blinking: -this.state.blinking }), 1000);
-    this.setState({ blinking: 1, blinker });
-  }
-
-  componentDidMount() {
-    if (this.props.blinken) this.blink();
-  }
-
-  componentDidUpdate() {
-    if (this.props.blinken) this.blink();
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.state.blinker);
   }
 
   render() {
@@ -51,12 +33,6 @@ class Card extends React.Component {
 
     if (this.state.peeking > 0)
       className += ' peeking';
-
-    if (this.state.blinking !== 0)
-      className += ' egg';
-
-    if (this.state.blinking === 1)
-      className += ' egg-on';
 
     var onClick = (this.props.revealed ? this.peek : this.props.onClick);
 
