@@ -215,7 +215,7 @@ class Root extends React.Component {
         word,
         type: key[i],
         revealed: revealed[i],
-        blinken: eggIndices.includes(i) && this.state.blinken,
+        blinken: i<5 && this.state.blinken,
         onClick: this.revealCard.bind(this, i)
       });
     });
@@ -243,7 +243,7 @@ class Root extends React.Component {
         key: word,
         word,
         type: key[i],
-        blinken: eggIndices.includes(i) && this.state.blinken,
+        blinken: i<5 && this.state.blinken,
         revealed: revealed[i]
       });
     });
