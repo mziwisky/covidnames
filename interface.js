@@ -36,6 +36,7 @@ class Root extends React.Component {
   }
 
   joinGame = (gameId) => {
+    gameId = correctedGameId(gameId)
     if (this.state.appState == "initialized") {
       this.actuallyJoin(gameId)
     } else if (this.state.appState == "initializing") {

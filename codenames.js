@@ -85,3 +85,7 @@ function fullPeerId(displayId) {
   if (!displayId) return displayId;
   return `${PEER_PREFIX}${displayId}`
 }
+
+function correctedGameId(gameId) {
+  return gameId.toUpperCase()
+}
